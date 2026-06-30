@@ -522,4 +522,12 @@ config ESP32_WIFI_DEBUG_PRINT
 	  Enabling this could increase the build size ~60kb
 	  depending on the project logging level.
 
+config ESP32_WIFI_VENDOR_IE_SCAN
+	bool "Report vendor IEs received during WiFi scan"
+	help
+	  When enabled, the ESP32 WiFi driver registers an ESP-IDF vendor IE
+	  callback during scanning and raises NET_EVENT_WIFI_VENDOR_IE_SCAN_RESULT
+	  for each beacon or probe response that contains a vendor IE (tag 0xDD).
+	  Requires CONFIG_NET_MGMT_EVENT_INFO=y.
+
 endif # WIFI_ESP32

@@ -1644,6 +1644,13 @@ void wifi_mgmt_raise_raw_scan_result_event(struct net_if *iface,
 }
 #endif /* CONFIG_WIFI_MGMT_RAW_SCAN_RESULTS */
 
+void wifi_mgmt_raise_vendor_ie_scan_result_event(struct net_if *iface,
+						 struct wifi_vendor_ie_scan_result *result)
+{
+	net_mgmt_event_notify_with_info(NET_EVENT_WIFI_VENDOR_IE_SCAN_RESULT,
+					iface, result, sizeof(*result));
+}
+
 void wifi_mgmt_raise_disconnect_complete_event(struct net_if *iface,
 					       int status)
 {

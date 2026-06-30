@@ -388,6 +388,8 @@ enum {
 	NET_EVENT_WIFI_CMD_NAN_PUBLISH_TERMINATED_VAL,
 	NET_EVENT_WIFI_CMD_NAN_SUBSCRIBE_TERMINATED_VAL,
 	NET_EVENT_WIFI_CMD_NAN_RECEIVE_VAL,
+	/** Vendor IE received during scan */
+	NET_EVENT_WIFI_CMD_VENDOR_IE_SCAN_RESULT_VAL,
 
 	NET_EVENT_WIFI_CMD_MAX,
 };
@@ -449,6 +451,8 @@ enum net_event_wifi_cmd {
 	/** Supplicant specific event */
 	NET_MGMT_CMD(NET_EVENT_WIFI_CMD_NAN_RECEIVE),
 #endif
+	/** Vendor IE received during scan */
+	NET_MGMT_CMD(NET_EVENT_WIFI_CMD_VENDOR_IE_SCAN_RESULT),
 };
 
 /** Event emitted for Wi-Fi scan result */
@@ -482,6 +486,10 @@ enum net_event_wifi_cmd {
 /** Event emitted for Wi-Fi raw scan result */
 #define NET_EVENT_WIFI_RAW_SCAN_RESULT                          \
 	(NET_WIFI_EVENT | NET_EVENT_WIFI_CMD_RAW_SCAN_RESULT)
+
+/** Event emitted when a vendor IE is received during a WiFi scan */
+#define NET_EVENT_WIFI_VENDOR_IE_SCAN_RESULT			\
+	(NET_WIFI_EVENT | NET_EVENT_WIFI_CMD_VENDOR_IE_SCAN_RESULT)
 
 /** Event emitted Wi-Fi disconnect is completed */
 #define NET_EVENT_WIFI_DISCONNECT_COMPLETE			\
@@ -1292,6 +1300,7 @@ union wifi_mgmt_events {
 #ifdef CONFIG_WIFI_MGMT_RAW_SCAN_RESULTS
 	struct wifi_raw_scan_result raw_scan_result;
 #endif /* CONFIG_WIFI_MGMT_RAW_SCAN_RESULTS */
+	struct wifi_vendor_ie_scan_result vendor_ie_scan_result;
 	struct wifi_twt_params twt_params;
 	struct wifi_ap_sta_info ap_sta_info;
 #ifdef CONFIG_WIFI_NM_WPA_SUPPLICANT_P2P
@@ -2425,6 +2434,14 @@ void wifi_mgmt_raise_twt_sleep_state(struct net_if *iface, int twt_sleep_state);
 void wifi_mgmt_raise_raw_scan_result_event(struct net_if *iface,
 		struct wifi_raw_scan_result *raw_scan_info);
 #endif /* CONFIG_WIFI_MGMT_RAW_SCAN_RESULTS */
+
+/** Wi-Fi management vendor IE scan result event
+ *
+ * @param iface Network interface
+ * @param result Vendor IE scan result
+ */
+void wifi_mgmt_raise_vendor_ie_scan_result_event(struct net_if *iface,
+		struct wifi_vendor_ie_scan_result *result);
 
 /** Wi-Fi management disconnect complete event
  *

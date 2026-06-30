@@ -780,6 +780,27 @@ enum wifi_vendor_ie_id {
 	WIFI_VENDOR_IE_ID_1,
 };
 
+/** Maximum payload length in a vendor IE (255 - 4 bytes for OUI[3] + OUI-type) */
+#define WIFI_VENDOR_IE_MAX_PAYLOAD_LEN 251
+
+/** @brief Vendor IE data received during a WiFi scan */
+struct wifi_vendor_ie_scan_result {
+	/** Source BSSID (MAC address of the AP) */
+	uint8_t bssid[WIFI_MAC_ADDR_LEN];
+	/** RSSI at time of reception */
+	int8_t rssi;
+	/** Channel (always 0 — not provided by ESP-IDF vendor IE callback) */
+	uint8_t channel;
+	/** Vendor OUI (3 bytes) */
+	uint8_t vendor_oui[3];
+	/** Vendor OUI type */
+	uint8_t vendor_oui_type;
+	/** Payload length (bytes after OUI + OUI-type) */
+	uint8_t payload_len;
+	/** Payload bytes */
+	uint8_t payload[WIFI_VENDOR_IE_MAX_PAYLOAD_LEN];
+};
+
 /** @brief Wi-Fi STA mode configuration parameter */
 enum wifi_config_param {
 	/** Used for STA mode configuration parameter OKC */

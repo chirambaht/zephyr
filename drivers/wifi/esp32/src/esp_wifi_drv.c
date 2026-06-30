@@ -246,6 +246,37 @@ pkt_unref:
 }
 #endif
 
+#if defined(CONFIG_ESP32_WIFI_VENDOR_IE_SCAN)
+static void esp32_vendor_ie_cb(void *ctx, wifi_vendor_ie_type_t type,
+			       const uint8_t sa[6],
+			       const vendor_ie_data_t *vnd_ie, int rssi)
+{
+	ARG_UNUSED(ctx);
+
+	if (type != WIFI_VND_IE_TYPE_BEACON && type != WIFI_VND_IE_TYPE_PROBE_RESP) {
+		return;
+	}
+
+	if (esp32_data.scan_cb == NULL) {
+		return;
+	}
+
+	struct wifi_vendor_ie_scan_result result = { 0 };
+
+	memcpy(result.bssid, sa, WIFI_MAC_ADDR_LEN);
+	result.rssi = (int8_t)rssi;
+	memcpy(result.vendor_oui, vnd_ie->vendor_oui, 3);
+	result.vendor_oui_type = vnd_ie->vendor_oui_type;
+
+	if (vnd_ie->length >= 4) {
+		result.payload_len = MIN(vnd_ie->length - 4, WIFI_VENDOR_IE_MAX_PAYLOAD_LEN);
+		memcpy(result.payload, vnd_ie->payload, result.payload_len);
+	}
+
+	wifi_mgmt_raise_vendor_ie_scan_result_event(esp32_wifi_iface, &result);
+}
+#endif /* CONFIG_ESP32_WIFI_VENDOR_IE_SCAN */
+
 static void scan_done_handler(void)
 {
 	esp_err_t ret;
@@ -327,6 +358,10 @@ static void scan_done_handler(void)
 	/* report end of scan event */
 	esp32_data.scan_cb(esp32_wifi_iface, 0, NULL);
 	esp32_data.scan_cb = NULL;
+
+#if defined(CONFIG_ESP32_WIFI_VENDOR_IE_SCAN)
+	esp_wifi_set_vendor_ie_cb(NULL, NULL);
+#endif
 }
 
 static void esp_wifi_handle_sta_connect_event(void *event_data)
@@ -1086,10 +1121,17 @@ static int esp32_wifi_scan(const struct device *dev __unused,
 		return -EAGAIN;
 	}
 
+#if defined(CONFIG_ESP32_WIFI_VENDOR_IE_SCAN)
+	esp_wifi_set_vendor_ie_cb(esp32_vendor_ie_cb, NULL);
+#endif
+
 	ret = esp_wifi_scan_start(&scan_config, false);
 	if (ret != ESP_OK) {
 		LOG_ERR("Failed to start Wi-Fi scanning (%d)", ret);
 		data->scan_cb = NULL;
+#if defined(CONFIG_ESP32_WIFI_VENDOR_IE_SCAN)
+		esp_wifi_set_vendor_ie_cb(NULL, NULL);
+#endif
 		return -EAGAIN;
 	}
 
