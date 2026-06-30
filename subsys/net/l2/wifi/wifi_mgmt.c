@@ -871,6 +871,20 @@ static int wifi_ap_config_params(uint64_t mgmt_request, struct net_if *iface,
 		}
 	}
 
+	if (params->type & WIFI_AP_CONFIG_PARAM_VENDOR_IE) {
+		if (params->vendor_ie_enable) {
+			if (params->vendor_ie_data == NULL ||
+			    params->vendor_ie_data_len < 6) {
+				/* Minimum: element_id(1) + length(1) + OUI(3) + OUI-type(1) */
+				return -EINVAL;
+			}
+			if (params->vendor_ie_data[0] != 0xDD) {
+				/* First byte must be WIFI_VENDOR_IE_ELEMENT_ID */
+				return -EINVAL;
+			}
+		}
+	}
+
 	return wifi_mgmt_api->ap_config_params(dev, iface, params);
 }
 

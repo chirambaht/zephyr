@@ -754,6 +754,30 @@ enum wifi_ap_config_param {
 	WIFI_AP_CONFIG_PARAM_HT_CAPAB = BIT(3),
 	/** Used for AP mode configuration parameter vht_capab */
 	WIFI_AP_CONFIG_PARAM_VHT_CAPAB = BIT(4),
+	/** Used for AP mode vendor-specific IE configuration */
+	WIFI_AP_CONFIG_PARAM_VENDOR_IE = BIT(5),
+};
+
+/** @brief Vendor IE frame type */
+enum wifi_vendor_ie_type {
+	/** Beacon frame */
+	WIFI_VENDOR_IE_TYPE_BEACON,
+	/** Probe request frame */
+	WIFI_VENDOR_IE_TYPE_PROBE_REQ,
+	/** Probe response frame */
+	WIFI_VENDOR_IE_TYPE_PROBE_RESP,
+	/** Association request frame */
+	WIFI_VENDOR_IE_TYPE_ASSOC_REQ,
+	/** Association response frame */
+	WIFI_VENDOR_IE_TYPE_ASSOC_RESP,
+};
+
+/** @brief Vendor IE slot index */
+enum wifi_vendor_ie_id {
+	/** Vendor IE slot 0 */
+	WIFI_VENDOR_IE_ID_0,
+	/** Vendor IE slot 1 */
+	WIFI_VENDOR_IE_ID_1,
 };
 
 /** @brief Wi-Fi STA mode configuration parameter */

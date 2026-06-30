@@ -1576,12 +1576,38 @@ static int esp32_wifi_set_config(const struct device *dev __unused,
 	return -ENOTSUP;
 }
 
+static int esp32_wifi_ap_config_params(const struct device *dev,
+				       struct net_if *iface,
+				       struct wifi_ap_config_params *params)
+{
+	ARG_UNUSED(dev);
+	ARG_UNUSED(iface);
+
+	if (params->type & WIFI_AP_CONFIG_PARAM_VENDOR_IE) {
+		wifi_vendor_ie_type_t idf_type = (wifi_vendor_ie_type_t)params->vendor_ie_type;
+		wifi_vendor_ie_id_t idf_id = (wifi_vendor_ie_id_t)params->vendor_ie_id;
+		esp_err_t err;
+
+		err = esp_wifi_set_vendor_ie(params->vendor_ie_enable, idf_type, idf_id,
+					     params->vendor_ie_enable ? params->vendor_ie_data
+								      : NULL);
+		if (err != ESP_OK) {
+			LOG_ERR("esp_wifi_set_vendor_ie failed: %d", err);
+			return -EIO;
+		}
+		return 0;
+	}
+
+	return -ENOTSUP;
+}
+
 static const struct wifi_mgmt_ops esp32_wifi_mgmt = {
 	.scan = esp32_wifi_scan,
 	.connect = esp32_wifi_connect,
 	.disconnect = esp32_wifi_disconnect,
 	.ap_enable = esp32_wifi_ap_enable,
 	.ap_disable = esp32_wifi_ap_disable,
+	.ap_config_params = esp32_wifi_ap_config_params,
 	.iface_status = esp32_wifi_status,
 	.set_power_save = esp32_wifi_set_power_save,
 #if defined(CONFIG_ESP32_WIFI_ENTERPRISE)

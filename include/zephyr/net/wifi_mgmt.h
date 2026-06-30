@@ -1366,6 +1366,16 @@ struct wifi_ap_config_params {
 	/** Parameter used for setting VHT capabilities */
 	char vht_capab[WIFI_AP_IEEE_80211_CAPAB_MAX_LEN + 1];
 #endif
+	/** Enable or disable the vendor IE (used with WIFI_AP_CONFIG_PARAM_VENDOR_IE) */
+	bool vendor_ie_enable;
+	/** Frame type the vendor IE is injected into */
+	enum wifi_vendor_ie_type vendor_ie_type;
+	/** Slot index for the vendor IE (0 or 1) */
+	enum wifi_vendor_ie_id vendor_ie_id;
+	/** Pointer to raw IE bytes: 0xDD, length, OUI[3], OUI-type, payload */
+	const uint8_t *vendor_ie_data;
+	/** Total byte length of vendor_ie_data */
+	uint8_t vendor_ie_data_len;
 };
 
 /** @brief Wi-Fi STA configuration parameter */
