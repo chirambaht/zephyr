@@ -523,3 +523,5 @@ config ESP32_WIFI_DEBUG_PRINT
 	  depending on the project logging level.
 
 endif # WIFI_ESP32
+
+source "drivers/wifi/esp32/Kconfig.esp32mesh"

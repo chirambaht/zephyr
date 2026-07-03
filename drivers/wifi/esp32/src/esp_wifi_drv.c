@@ -325,8 +325,10 @@ static void scan_done_handler(void)
 	esp_wifi_clear_ap_list();
 
 	/* report end of scan event */
-	esp32_data.scan_cb(esp32_wifi_iface, 0, NULL);
-	esp32_data.scan_cb = NULL;
+	if (esp32_data.scan_cb) {
+		esp32_data.scan_cb(esp32_wifi_iface, 0, NULL);
+		esp32_data.scan_cb = NULL;
+	}
 }
 
 static void esp_wifi_handle_sta_connect_event(void *event_data)
@@ -806,7 +808,16 @@ void esp_wifi_event_handler(const char *event_base, int32_t event_id, void *even
 		esp_wifi_handle_sta_disconnect_event(event_data);
 		break;
 	case WIFI_EVENT_SCAN_DONE:
+#if defined(CONFIG_WIFI_ESP32_MESH)
+		{
+			uint16_t ap_count = 0;
+
+			esp_wifi_scan_get_ap_num(&ap_count);
+			LOG_INF("Mesh scan done: %u APs found", ap_count);
+		}
+#else
 		scan_done_handler();
+#endif
 		break;
 	case WIFI_EVENT_AP_START:
 		ap_data->state = ESP32_AP_STARTED;
@@ -833,6 +844,10 @@ void esp_wifi_event_handler(const char *event_base, int32_t event_id, void *even
 
 static int esp32_wifi_disconnect(const struct device *dev __unused, struct net_if *iface __unused)
 {
+#if defined(CONFIG_WIFI_ESP32_MESH)
+	LOG_WRN("WiFi disconnect disabled: mesh mode active");
+	return -ENOTSUP;
+#else
 	int ret = esp_wifi_disconnect();
 
 	if (ret != ESP_OK) {
@@ -841,6 +856,7 @@ static int esp32_wifi_disconnect(const struct device *dev __unused, struct net_i
 	}
 
 	return 0;
+#endif /* CONFIG_WIFI_ESP32_MESH */
 }
 
 static void esp32_wifi_set_bssid(wifi_config_t *wifi_config,
@@ -871,6 +887,11 @@ static int esp32_wifi_connect(const struct device *dev __unused,
 			    struct net_if *iface,
 			    struct wifi_connect_req_params *params)
 {
+#if defined(CONFIG_WIFI_ESP32_MESH)
+	/* Mesh blob owns the radio — normal WiFi connect is disabled. */
+	LOG_WRN("WiFi connect disabled: mesh mode active");
+	return -ENOTSUP;
+#else
 	struct esp32_wifi_runtime *data = esp32_wifi_data_get(iface);
 	wifi_mode_t mode;
 	int ret;
@@ -1036,6 +1057,7 @@ static int esp32_wifi_connect(const struct device *dev __unused,
 	}
 
 	return 0;
+#endif /* CONFIG_WIFI_ESP32_MESH */
 }
 
 static int esp32_wifi_scan(const struct device *dev __unused,
@@ -1043,6 +1065,11 @@ static int esp32_wifi_scan(const struct device *dev __unused,
 			   struct wifi_scan_params *params,
 			   scan_result_cb_t cb)
 {
+#if defined(CONFIG_WIFI_ESP32_MESH)
+	/* Mesh blob owns the radio — passive scan via wifi_mgmt is disabled. */
+	LOG_WRN("WiFi scan disabled: mesh mode active");
+	return -ENOTSUP;
+#else
 	struct esp32_wifi_runtime *data = esp32_wifi_data_get(iface);
 	int ret = 0;
 
@@ -1094,6 +1121,7 @@ static int esp32_wifi_scan(const struct device *dev __unused,
 	}
 
 	return 0;
+#endif /* CONFIG_WIFI_ESP32_MESH */
 };
 
 static int esp32_wifi_ap_enable(const struct device *dev __unused, struct net_if *iface,

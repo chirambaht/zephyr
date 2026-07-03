@@ -1,0 +1,13 @@
+sample:
+  name: ESP-WIFI-MESH
+  description: Basic ESP-WIFI-MESH networking sample for ESP32-S3 on Zephyr RTOS.
+tests:
+  sample.net.esp_wifi_mesh:
+    tags: wifi mesh esp32
+    platform_allow:
+      - esp32s3_devkitc/esp32s3/procpu
+    integration_platforms:
+      - esp32s3_devkitc/esp32s3/procpu
+    extra_configs:
+      - CONFIG_WIFI_ESP32=y
+      - CONFIG_WIFI_ESP32_MESH=y

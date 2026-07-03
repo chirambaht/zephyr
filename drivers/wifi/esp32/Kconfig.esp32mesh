@@ -1,0 +1,89 @@
+# Copyright (c) 2024 Espressif Systems (Shanghai) Co., Ltd.
+# SPDX-License-Identifier: Apache-2.0
+
+config WIFI_ESP32_MESH
+	bool "ESP32 Wi-Fi Mesh (ESP-WIFI-MESH) support"
+	depends on WIFI_ESP32
+	help
+	  Enable ESP-WIFI-MESH networking support. When enabled, the mesh blob
+	  (libmesh.a) takes ownership of the WiFi radio. The normal wifi connect
+	  shell command and wifi_mgmt connect API are disabled — the mesh stack
+	  manages the STA and SoftAP interfaces autonomously.
+
+if WIFI_ESP32_MESH
+
+config ESP32_MESH_ID_FROM_MAC
+	bool "Derive mesh network ID from device STA MAC address"
+	help
+	  Use the device's WiFi STA MAC address as the 6-byte mesh network ID.
+	  NOTE: All nodes in the same mesh network must share an identical mesh ID.
+	  This option is only useful for single-device testing or when you flash
+	  a common ID derived from one device's MAC to every node. For production,
+	  leave this disabled and set CONFIG_ESP32_MESH_ID instead.
+
+config ESP32_MESH_ID
+	string "Mesh network ID (6-byte hex, e.g. 77:77:77:77:77:77)"
+	default "77:77:77:77:77:77"
+	depends on !ESP32_MESH_ID_FROM_MAC
+	help
+	  6-byte mesh network identifier shared across all nodes in the mesh.
+	  All devices with the same mesh ID can communicate.
+
+config ESP32_MESH_ROUTER_SSID
+	string "External router SSID"
+	default ""
+	help
+	  SSID of the external WiFi router that the mesh root node will connect
+	  to for internet access. Leave empty if no external router is needed.
+
+config ESP32_MESH_ROUTER_PASS
+	string "External router password"
+	default ""
+	help
+	  Password for the external router. Leave empty for open networks.
+
+config ESP32_MESH_AP_PASS
+	string "Mesh SoftAP password"
+	default "meshpass123"
+	help
+	  Password for the mesh SoftAP interface used for child-node connections.
+	  Must be at least 8 characters.
+
+config ESP32_MESH_CHANNEL
+	int "WiFi channel for the mesh network (0 = auto-scan)"
+	range 0 13
+	default 0
+	help
+	  WiFi channel on which the mesh network operates. Set to 0 to let the
+	  mesh stack perform a full channel scan and select automatically.
+
+config ESP32_MESH_MAX_LAYER
+	int "Maximum depth of the mesh tree"
+	range 1 25
+	default 6
+	help
+	  Maximum number of layers in the mesh tree topology. The root node is
+	  layer 1. Nodes beyond this depth cannot join the mesh.
+
+config ESP32_MESH_MAX_CONNECTION
+	int "Maximum child connections per node"
+	range 1 10
+	default 6
+	help
+	  Maximum number of mesh child nodes that each node can accept as
+	  downstream connections.
+
+config ESP32_MESH_RX_THREAD_STACK_SIZE
+	int "Mesh RX thread stack size (bytes)"
+	default 4096
+	help
+	  Stack size for the dedicated mesh receive thread that blocks on
+	  esp_mesh_recv().
+
+config ESP32_MESH_RX_THREAD_PRIORITY
+	int "Mesh RX thread priority"
+	default 5
+	help
+	  Cooperative thread priority for the mesh RX thread.
+
+endif # WIFI_ESP32_MESH
